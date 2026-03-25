@@ -99,7 +99,7 @@ app.post('/api/flights', async (req, res) => {
     );
 
     const flug_id = await flightRepo.create(flug);
-    const anzahlNeuerSitze = await generateSeatsForFlight(flug_id, machine.anzahl_reihen, machine.anzahl_sitze);
+    const anzahlNeuerSitze = await generateSeatsForFlight(flug_id, machine.anzahl_reihen, machine.anzahl_sitze, machine.anzahl_ebenen);
 
     res.json({
       success: true,

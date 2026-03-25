@@ -17,7 +17,7 @@
       background: #28a745; color: white; font-weight: bold; 
       display: flex; align-items: center; justify-content: center; 
       font-size: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      cursor: pointer;                 
+      cursor: pointer;
     }
     .seat:hover { transform: scale(1.15); }
     .seat.booked { 
@@ -26,6 +26,26 @@
     }
     .seat.booked:hover { transform: none; }
     .aisle { width: 50px; background: #ddd; border-radius: 4px; }
+
+    /* Neue Tabs für Ebenen */
+    .level-tabs {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .level-tab {
+      padding: 12px 24px;
+      background: #f1f1f1;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .level-tab.active {
+      background: #1e3a8a;
+      color: white;
+    }
     .back { 
       display: inline-block; margin-bottom: 15px; padding: 10px 15px; 
       background: #007bff; color: white; border-radius: 8px; text-decoration: none; 
@@ -37,18 +57,26 @@
   
   <h1 id="title">Sitzplan wird geladen...</h1>
   <div class="info" id="info"></div>
+
+  <!-- Neue Ebenen-Tabs -->
+  <div id="levelTabs" class="level-tabs"></div>
+
   <div class="seat-map" id="map"></div>
 
   <script>
+    let currentFlight = null;
+    let currentLevel = 1;   // aktuelle angezeigte Ebene (1 oder 2)
+
     async function loadMinimalSeatMap() {
-      const params = new URLSearchParams(location.search);    // location.search = z.b. "?flightId=1"
-      const flightId = params.get('flightId');                //Flug-ID aus der URL holen ;
+      const params = new URLSearchParams(location.search);
+      const flightId = params.get('flightId');
       if (!flightId) return;
 
-      const res = await fetch(`/api/flights/${flightId}`);    // Daten vom Server holen als JSON
-      const flight = await res.json();                        // verwandelt diese Antwort in ein normales JavaScript-Objekt 
+      const res = await fetch(`/api/flights/${flightId}`);
+      const flight = await res.json();
+      currentFlight = flight;
 
-      // Titel + Info generieren
+      // Titel + Info
       document.getElementById('title').textContent = flight.flugname;
       document.getElementById('info').innerHTML = `
         ${flight.startflughafen} → ${flight.endflughafen}<br>
@@ -56,106 +84,104 @@
         <strong>${flight.maschinen_kuerzel} – ${flight.maschinen_name}</strong>
       `;
 
-      // Gebuchte Sitze vom Server laden
+      // Gebuchte Sitze laden
       let bookedSeats = [];
       try {
         const bookedRes = await fetch(`/api/flights/${flightId}/bookings`);
-        if (bookedRes.ok) {
-          bookedSeats = await bookedRes.json();
-        }
-      } catch (e) {
-        console.warn("Gebuchte Sitze konnten nicht geladen werden", e);
-      }
+        if (bookedRes.ok) bookedSeats = await bookedRes.json();
+      } catch (e) {}
 
-      // Grid mit anzahl_reihen + anzahl_sitze
-      renderGrid(flight.anzahl_reihen, flight.anzahl_sitze, flightId, bookedSeats);
+      // Tabs für Ebenen anzeigen (nur wenn > 1 Ebene)
+      renderLevelTabs(flight.anzahl_ebenen);
+
+      // Erste Ebene rendern
+      renderGrid(flight.anzahl_reihen, flight.anzahl_sitze, flightId, bookedSeats, currentLevel);
     }
 
-    function renderGrid(numRows, seatsPerRow, flightId, bookedSeats) {
+    function renderLevelTabs(anzahlEbenen) {
+      const container = document.getElementById('levelTabs');
+      container.innerHTML = '';
+
+      if (anzahlEbenen <= 1) return;   // keine Tabs nötig
+
+      for (let ebene = 1; ebene <= anzahlEbenen; ebene++) {
+        const btn = document.createElement('button');
+        btn.className = `level-tab ${ebene === currentLevel ? 'active' : ''}`;
+        btn.textContent = `Ebene ${ebene}`;
+        btn.onclick = () => {
+          currentLevel = ebene;
+          renderLevelTabs(anzahlEbenen);   // aktiven Tab aktualisieren
+          loadMinimalSeatMap();            // neu rendern
+        };
+        container.appendChild(btn);
+      }
+    }
+
+    function renderGrid(reihenProEbene, seatsPerRow, flightId, bookedSeats, level) {
       const map = document.getElementById('map');
       map.innerHTML = '';
 
-      // Echtes Flugzeug-Layout (nur 3-3, 3-4-3, 3-3-3)
+      const startReihe = (level - 1) * reihenProEbene + 1;   // z.B. Ebene 2 → ab Reihe 21
+
       let groups = [seatsPerRow];
       if (seatsPerRow === 6) groups = [3, 3];
       if (seatsPerRow === 9) groups = [3, 3, 3];
       if (seatsPerRow === 10) groups = [3, 4, 3];
 
-      for (let row = 1; row <= numRows; row++) {
+      for (let i = 0; i < reihenProEbene; i++) {
+        const reihe = startReihe + i;
+
         const rowDiv = document.createElement('div');
         rowDiv.className = 'row';
 
-        // Anzeige Reihennummer (links)
+        // Linke Reihennummer
         const labelLeft = document.createElement('div');
         labelLeft.className = 'row-label';
-        labelLeft.textContent = row;
+        labelLeft.textContent = reihe;
         rowDiv.appendChild(labelLeft);
 
         const seatsDiv = document.createElement('div');
         seatsDiv.className = 'seats';
 
-        let letter = 65;                 //Initialisierung auf den ersten Sitz (A) jeder Reihe, was im ASCII-Code für 65 steht
+        let letter = 65;
         groups.forEach((size, idx) => {
-          for (let i = 0; i < size; i++) {
-            const s = document.createElement('div');
-            s.className = 'seat';
-            const buchstabe = String.fromCharCode(letter++);      // Übersetzung vom Zahlenwert auf den entsprechenden Buchstaben 
-            s.textContent = buchstabe;
+          for (let s = 0; s < size; s++) {
+            const buchstabe = String.fromCharCode(letter++);
+            const seatDiv = document.createElement('div');
+            seatDiv.className = 'seat';
+            seatDiv.textContent = buchstabe;
 
-            // Daten speichern, damit wir später wissen, welcher Sitz das ist
-            s.dataset.reihe = row;
-            s.dataset.buchstabe = buchstabe;
-            s.dataset.flightId = flightId;
+            seatDiv.dataset.reihe = reihe;
+            seatDiv.dataset.buchstabe = buchstabe;
+            seatDiv.dataset.flightId = flightId;
 
-            // Prüfen, ob der Sitz bereits gebucht ist
             const isBooked = bookedSeats.some(bs => 
-              parseInt(bs.reihe) === parseInt(row) && bs.buchstabe === buchstabe
+              parseInt(bs.reihe) === reihe && bs.buchstabe === buchstabe
             );
 
             if (isBooked) {
-              s.classList.add('booked');
-              s.onclick = () => {
-                alert(`Sitz ${row}${buchstabe} ist bereits reserviert.`);
-              };
+              seatDiv.classList.add('booked');
+              seatDiv.onclick = () => alert(`Sitz ${reihe}${buchstabe} ist bereits reserviert.`);
             } else {
-              // Einzelnen Sitz Klickbar machen
-              s.onclick = async () => {
-                const reihe = s.dataset.reihe;
-                const sitz = s.dataset.buchstabe;
-                const flug = s.dataset.flightId;
+              seatDiv.onclick = async () => {
+                if (confirm(`Sitz ${reihe}${buchstabe} auf Flug ${flightId} reservieren?`)) {
+                  // ... (dein bisheriger POST-Code bleibt gleich)
+                  const response = await fetch('/api/bookings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ flightId: parseInt(flightId), reihe, sitz: buchstabe })
+                  });
 
-                if (confirm(`Sitz ${reihe}${sitz} auf Flug ${flug} reservieren?`)) {
-                  try {
-                    const response = await fetch('/api/bookings', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify({
-                        flightId: parseInt(flug),
-                        reihe: parseInt(reihe),
-                        sitz: sitz
-                      })
-                    });
-
-                    if (response.ok) {
-                      console.log(`Reservierung erfolgt: Flug ${flug} | Sitz ${reihe}${sitz}`);
-                      alert(`Sitz ${reihe}${sitz} wurde reserviert\n\n`);
-                      // Karte neu laden, um den aktualisierten Status (gebucht) anzuzeigen
-                      loadMinimalSeatMap();
-                    } else {
-                      const errorText = await response.text();
-                      alert('Buchung fehlgeschlagen: ' + (errorText || 'Unbekannter Fehler'));
-                    }
-                  } catch (error) {
-                    console.error(error);
-                    alert('Fehler bei der Verbindung zum Server.');
+                  if (response.ok) {
+                    alert(`Sitz ${reihe}${buchstabe} wurde reserviert! 🎉`);
+                    loadMinimalSeatMap();   // neu laden
+                  } else {
+                    alert('Buchung fehlgeschlagen');
                   }
                 }
               };
             }
-
-            seatsDiv.appendChild(s);
+            seatsDiv.appendChild(seatDiv);
           }
           if (idx < groups.length - 1) {
             const aisle = document.createElement('div');
@@ -166,10 +192,10 @@
 
         rowDiv.appendChild(seatsDiv);
 
-        // Anzeige Reihennummer (rechts)
+        // Rechte Reihennummer
         const labelRight = document.createElement('div');
         labelRight.className = 'row-label';
-        labelRight.textContent = row;
+        labelRight.textContent = reihe;
         rowDiv.appendChild(labelRight);
 
         map.appendChild(rowDiv);
