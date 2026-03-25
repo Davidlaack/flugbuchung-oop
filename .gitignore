@@ -1,3 +1,6 @@
+# *.db          # DB wieder IN Git
+# *.sqlite
+# *.db-journal
 # macOS
 .DS_Store
 
