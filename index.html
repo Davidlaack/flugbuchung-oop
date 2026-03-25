@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flüge - Sitzreservierung</title>
+  <style>
+    body { 
+      font-family: Arial; 
+      max-width: 800px; 
+      margin: 0 auto; 
+      padding: 20px; 
+      background: #f8f9fa;
+    }
+    .loading { text-align: center; color: #666; }
+    .flight-list { display: flex; flex-direction: column; gap: 15px; }
+    .flight { 
+      background: white; 
+      padding: 20px; 
+      border-radius: 12px; 
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: all 0.2s;
+    }
+    .flight:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    .flight h3 { margin: 0 0 10px 0; color: #1e3a8a; }
+    .flight p { margin: 5px 0; color: #666; }
+    .flight .maschine { font-weight: bold; color: #007bff; }
+    .error { color: #dc3545; text-align: center; padding: 20px; }
+  </style>
+</head>
+<body>
+  <a href="addFlight.html">Flug hinzufügen</a>
+  <h1>Verfügbare Flüge</h1>
+  
+  <div id="loading" class="loading">Flüge werden geladen...</div>
+  <div id="error" class="error" style="display: none;"></div>
+  <div id="flightList" class="flight-list" style="display: none;"></div>
+
+  <script>
+    async function loadFlights() {
+      try {
+        // 1. Flüge aus Backend laden
+        const response = await fetch('/api/flights');
+        
+        if (!response.ok) throw new Error('Keine Verbindung zum Server');
+        
+        const flights = await response.json();
+        
+        // 2. HTML generieren
+        const flightList = document.getElementById('flightList');
+        const loading = document.getElementById('loading');
+        
+        flights.forEach(flight => {
+          const div = document.createElement('div');
+          div.className = 'flight';
+          div.onclick = () => window.location.href = `seats.html?flightId=${flight.flug_id}`;
+          div.innerHTML = `
+            <h3>${flight.flugname}</h3>
+            <p>${flight.startflughafen} → ${flight.endflughafen}</p>
+            <p>${flight.datum} | ${flight.uhrzeit}</p>
+            <p class="maschine">${flight.maschinen_kuerzel} (${flight.maschinen_name})</p>
+          `;
+          flightList.appendChild(div);
+        });
+        
+        // 3. UI wechseln
+        loading.style.display = 'none';
+        flightList.style.display = 'block';
+        
+      } catch (error) {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').innerHTML = `Fehler: ${error.message}<br>
+          <small>Prüfe ob dein Node-Server läuft (localhost:3000)</small>`;
+        document.getElementById('error').style.display = 'block';
+      }
+    }
+    
+    // Automatisch laden
+    loadFlights();
+  </script>
+</body>
+</html>

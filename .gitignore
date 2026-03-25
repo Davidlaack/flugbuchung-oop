@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# SQLite Database (nicht in Git!)
+*.db
+*.sqlite
+*.db-journal
+
+# Node.js
+node_modules/
+package-lock.json
+
+# Logs/Env
+*.log
+.env

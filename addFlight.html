@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flüge - Sitzreservierung</title>
+  <style>
+    body { 
+      font-family: Arial; 
+      max-width: 800px; 
+      margin: 0 auto; 
+      padding: 20px; 
+      background: #f8f9fa;
+    }
+    .loading { text-align: center; color: #666; }
+    .back { 
+      display: inline-block; margin-bottom: 15px; padding: 10px 15px; 
+      background: #007bff; color: white; border-radius: 8px; text-decoration: none; }
+    .dialogField { 
+      display: flex; flex-direction: column; gap: 15px; 
+      background: white; 
+      padding: 30px; 
+      border-radius: 12px; 
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    label { font-weight: bold; color: #333; }
+    input, select { 
+      padding: 12px; 
+      border: 1px solid #ddd; 
+      border-radius: 8px; 
+      font-size: 16px; 
+    }
+    input[type="submit"] { 
+      background: #28a745; 
+      color: white; 
+      border: none; 
+      cursor: pointer; 
+      font-weight: bold;
+    }
+    input[type="submit"]:hover { background: #218838; }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back">← Zurück</a>
+  <h1>Flug hinzufügen</h1>
+
+  <div id="dialogField" class="dialogField">
+    <form id="addFlightForm">
+      <label>Flugnummer:</label>
+      <input type="text" name="flugnummer" placeholder="LH1234" required>
+
+      <label>Flugzeug:</label>
+      <select name="maschine" required>
+        <option value="">Wählen Sie die Maschine</option>
+        <option value="A320">Airbus A320</option>
+        <option value="B737">Boeing 737</option>
+        <option value="A319">Airbus A319</option>
+        <option value="A380">Airbus A380</option>
+        <option value="A321neo">Airbus A321neo</option>
+        <option value="B777">Boeing 777</option>
+      </select>
+
+      <label>Start:</label>
+      <input type="text" name="startflughafen" placeholder="BRE" required>
+
+      <label>Ziel:</label>
+      <input type="text" name="endflughafen" placeholder="HAM" required>
+
+      <label>Datum:</label>
+      <input type="date" name="datum" required>
+
+      <label>Uhrzeit:</label>
+      <input type="time" name="uhrzeit" required>
+
+      <input type="submit" value="Flug eintragen">
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('addFlightForm').addEventListener('submit', async function (e) {
+      e.preventDefault();                     // verhindert normales Absenden der Seite
+
+      const form = e.target;
+      const payload = {
+        flugname: form.flugnummer.value.trim(),
+        maschinen_kuerzel: form.maschine.value,
+        startflughafen: form.startflughafen.value.trim(),
+        endflughafen: form.endflughafen.value.trim(),
+        datum: form.datum.value,
+        uhrzeit: form.uhrzeit.value
+      };
+
+      try {
+        const response = await fetch('/api/flights', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          alert('Flug erfolgreich angelegt und alle Sitze wurden automatisch erstellt!');
+          form.reset();                       // Formular leeren
+          // Optional: nach 1 Sekunde zurück zur Übersicht
+          // setTimeout(() => window.location.href = 'index.html', 800);
+        } else {
+          const err = await response.json();
+          alert('Fehler: ' + (err.error || 'Unbekannter Server-Fehler'));
+        }
+      } catch (error) {
+        console.error(error);
+        alert('Verbindungsfehler zum Server – läuft der Server?');
+      }
+    });
+  </script>
+</body>
+</html>
