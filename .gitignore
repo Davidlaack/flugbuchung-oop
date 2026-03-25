@@ -1,13 +1,12 @@
-# *.db          # DB wieder IN Git
-# *.sqlite
-# *.db-journal
 # macOS
 .DS_Store
 
-# SQLite Database (nicht in Git!)
+# SQLite Database (NICHT in Git!)
 *.db
 *.sqlite
 *.db-journal
+*.sqlite-shm
+*.sqlite-wal
 
 # Node.js
 node_modules/
