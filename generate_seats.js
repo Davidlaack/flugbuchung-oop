@@ -41,7 +41,7 @@ async function generateSeatsForFlight(flug_id, anzahl_reihen_pro_ebene, anzahl_s
       Promise.all(insertPromises)
         .then(() => {
           const total = insertPromises.length;
-          console.log(`✅ ${total} Sitze für Flug ${flug_id} angelegt (${anzahl_ebenen} Ebenen)`);
+          console.log(`${total} Sitze für Flug ${flug_id} angelegt (${anzahl_ebenen} Ebenen)`);
           resolve(total);
         })
         .catch(reject);
