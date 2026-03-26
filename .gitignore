@@ -1,17 +1,32 @@
-# macOS
-.DS_Store
-
-# SQLite Database (NICHT in Git!)
-*.db
-*.sqlite
-*.db-journal
-*.sqlite-shm
-*.sqlite-wal
-
 # Node.js
 node_modules/
 package-lock.json
+npm-debug.log*
 
-# Logs/Env
+# Datenbank (jeder generiert lokal)
+flugdatenbank.db
+*.db
+*.sqlite
+*.sqlite-*
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
 *.log
-.env
+logs/
