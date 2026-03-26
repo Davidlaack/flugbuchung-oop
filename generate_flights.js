@@ -12,8 +12,8 @@ const insertFluege = `
   ('LH456', 2, 'BRE', 'FRA', '26.03.2026', '09:30'),      -- B737 (maschinen_id 2)
   ('KL1766', 3, 'BRE', 'AMS', '26.03.2026', '16:30'),     -- A319 (maschinen_id 3)
   ('LH789', 4, 'BRE', 'STN', '27.03.2026', '11:00'),      -- A380 (maschinen_id 4)
-  ('LX234 BRE-MAD', 5, 'BRE', 'AYT', '27.03.2026', '16:45'), -- A321neo (maschinen_id 5)
-  ('TK1987 BRE-IST', 6, 'BRE', 'IST', '28.03.2026', '08:30'); -- B777 (maschinen_id 6)
+  ('LX234', 5, 'BRE', 'AYT', '27.03.2026', '16:45'), -- A321neo (maschinen_id 5)
+  ('TK1987', 6, 'BRE', 'IST', '28.03.2026', '08:30'); -- B777 (maschinen_id 6)
 `;
 
 async function seedFluege() {
