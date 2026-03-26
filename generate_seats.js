@@ -56,7 +56,7 @@ async function generateSeatsForFlight(flug_id, anzahl_reihen_pro_ebene, anzahl_s
 if (require.main === module) {
   console.log('Starte manuelle Sitz-Generierung für ALLE Flüge ohne Sitze...');
 
-  // Sitzkonfiguration pro Maschinen-ID (an deine generate_machines.js anpassen)
+  // Sitzkonfiguration pro Maschinen-ID
   const seatConfigByMachine = {
     1: { anzahl_reihen_pro_ebene: 30, anzahl_sitze: 6, anzahl_ebenen: 1 },   // A320
     2: { anzahl_reihen_pro_ebene: 30, anzahl_sitze: 6, anzahl_ebenen: 1 },   // B737
@@ -85,7 +85,7 @@ if (require.main === module) {
 
     const processNext = async () => {
       if (processed === flights.length) {
-        console.log(`Manuelle Sitz-Generierung abgeschlossen! Insgesamt ${totalAdded} Sitze angelegt.`);
+        console.log(`Manuelle Sitz-Generierung abgeschlossen. Insgesamt ${totalAdded} Sitze angelegt.`);
         db.close();
         return;
       }

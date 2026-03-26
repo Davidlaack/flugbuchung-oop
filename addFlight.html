@@ -78,7 +78,7 @@
 
   <script>
     document.getElementById('addFlightForm').addEventListener('submit', async function (e) {
-      e.preventDefault();                     // verhindert normales Absenden der Seite
+      e.preventDefault();
 
       const form = e.target;
       const payload = {
@@ -99,16 +99,14 @@
 
         if (response.ok) {
           alert('Flug erfolgreich angelegt und alle Sitze wurden automatisch erstellt!');
-          form.reset();                       // Formular leeren
-          // Optional: nach 1 Sekunde zurück zur Übersicht
-          // setTimeout(() => window.location.href = 'index.html', 800);
+          form.reset();
         } else {
           const err = await response.json();
           alert('Fehler: ' + (err.error || 'Unbekannter Server-Fehler'));
         }
       } catch (error) {
         console.error(error);
-        alert('Verbindungsfehler zum Server – läuft der Server?');
+        alert('Verbindungsfehler zum Server');
       }
     });
   </script>

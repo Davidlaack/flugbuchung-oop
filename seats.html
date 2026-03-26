@@ -27,7 +27,6 @@
     .seat.booked:hover { transform: none; }
     .aisle { width: 50px; background: #ddd; border-radius: 4px; }
 
-    /* Neue Tabs für Ebenen */
     .level-tabs {
       display: flex;
       gap: 10px;
@@ -102,7 +101,7 @@
       const container = document.getElementById('levelTabs');
       container.innerHTML = '';
 
-      if (anzahlEbenen <= 1) return;   // keine Tabs nötig
+      if (anzahlEbenen <= 1) return;   // keine Tabs nötig, wenn es nur eine Ebene gibt
 
       for (let ebene = 1; ebene <= anzahlEbenen; ebene++) {
         const btn = document.createElement('button');
@@ -165,7 +164,6 @@
             } else {
               seatDiv.onclick = async () => {
                 if (confirm(`Sitz ${reihe}${buchstabe} auf Flug ${flightId} reservieren?`)) {
-                  // ... (dein bisheriger POST-Code bleibt gleich)
                   const response = await fetch('/api/bookings', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -173,7 +171,7 @@
                   });
 
                   if (response.ok) {
-                    alert(`Sitz ${reihe}${buchstabe} wurde reserviert! 🎉`);
+                    alert(`Sitz ${reihe}${buchstabe} wurde reserviert`);
                     loadMinimalSeatMap();   // neu laden
                   } else {
                     alert('Buchung fehlgeschlagen');

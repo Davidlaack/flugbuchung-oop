@@ -5,7 +5,7 @@ class Flug {
     this.maschinen_id = maschinen_id;
     this.startflughafen = startflughafen;
     this.endflughafen = endflughafen;
-    this.datum = datum;           // wird als TT.MM.JJJJ gespeichert
+    this.datum = datum; 
     this.uhrzeit = uhrzeit;
   }
 

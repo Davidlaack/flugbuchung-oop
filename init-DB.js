@@ -1,4 +1,4 @@
-// init-db.js - Erstellt deine Flugbuchung-Datenbankstruktur
+// init-db.js - Erstellt Flugbuchung-Datenbankstruktur
 // Node.js + sqlite3 erforderlich: npm install sqlite3
 
 const sqlite3 = require('sqlite3').verbose();
