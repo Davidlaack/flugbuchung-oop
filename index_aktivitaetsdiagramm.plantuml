@@ -1,0 +1,61 @@
+@startuml
+title Ablauf beim Aufruf von index.html
+
+skinparam shadowing false
+skinparam monochrome false
+
+|Browser|
+start
+:User öffnet\nhttp://localhost:3000/index.html;
+:Browser rendert index.html;
+:Zeigt Überschrift + "Flüge werden geladen...";
+
+|Express Server|
+:Empfängt GET /index.html;
+:Liefert statische Datei index.html;
+
+|Browser|
+:JavaScript startet automatisch;
+:fetch('/api/flights') wird ausgeführt;
+
+|Express Server|
+:Empfängt GET /api/flights;
+:Ruft flightRepo.getAll() auf;
+
+|Repositories|
+:FlightRepository.getAll() gestartet;
+:Führt SQL-SELECT aus:\n(Join zwischen flug und maschine);
+
+|DB|
+:Datenbank (flugdatenbank.db)\ngibt Rohdatensätze zurück;
+
+|Repositories|
+:Für jeden Datensatz:
+:Erstellt neues **Flug**-Objekt;
+
+|Models|
+:**Flug**-Konstruktor wird aufgerufen;
+:Setzt Eigenschaften:\n- flugId\n- flugname\n- startFlughafen\n- zielFlughafen\n- datum\n- uhrzeit;
+:**Maschine**-Konstruktor wird aufgerufen;
+:Setzt Maschinen-Eigenschaften:\n- maschineId\n- kuerzel\n- modell\n- sitzanzahl;
+:Flug-Objekt erhält Referenz auf Maschine-Objekt;
+
+|Repositories|
+:Sammelt alle Flug-Objekte in einem Array;
+:Gibt Array<Flug> zurück an Express Server;
+
+|Express Server|
+:Konvertiert Array von Flug-Objekten zu JSON\n(inkl. verschachtelter Maschine-Daten);
+:Sendet JSON-Antwort an Browser;
+
+|Browser|
+:JavaScript empfängt JSON-Daten;
+:Verarbeitet jedes Flug-Objekt;
+:Erstellt dynamisch HTML-Tabelle;
+:Füllt Spalten mit:\n• Flugname\n• Von → Nach\n• Datum & Uhrzeit\n• Maschinenkürzel;
+:Entfernt "Flüge werden geladen...";
+:Zeigt fertige Flugliste an;
+
+stop
+
+@enduml
